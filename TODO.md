@@ -13,8 +13,9 @@
 - [ ] Implement logging for debugging and monitoring
 - [ ] Optimize performance of the chatbot model
 - [ ] Plan for deployment (e.g., Flask app, Docker)
-- [ ] Create a user interface (CLI or GUI)
+- [x] Create a user interface (CLI or GUI)
 - [ ] Add error handling and input validation
 - [ ] Review and refactor code for readability
 - [ ] Update documentation as features are added
 - [ ] Prepare for future feature enhancements
+- [ ] Add contenerization
