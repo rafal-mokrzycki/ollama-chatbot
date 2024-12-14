@@ -1,25 +1,20 @@
+import repackage
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama import OllamaLLM
+from pydantic import BaseModel  # Import BaseModel
+
+repackage.up()
+from models.ollama.main import handle_conversation  # Import the unified function
 
 app = FastAPI()
 
-# Initialize the model and prompt template
-template = """
-Answer the question below.
 
-Here is the conversation history: {context}
+# Define a Pydantic model for the request body
+class QuestionRequest(BaseModel):
+    question: str  # Expecting a field named 'question'
 
-Question: {question}
-
-Answer:
-"""
-model = OllamaLLM(model="llama3")
-prompt = ChatPromptTemplate.from_template(template)
-chain = prompt | model
 
 # Store conversation history in memory (for simplicity)
 context = ""
@@ -37,11 +32,11 @@ async def read_root(request: Request):
 
 
 @app.post("/ask")
-async def ask_bot(question: str):
+async def ask(request: QuestionRequest):  # Use the Pydantic model here
     global context
-    result = chain.invoke({"context": context, "question": question})
-    context += f"\nUser: {question}\nAI: {result}"
-    return {"answer": result}
+    answer = handle_conversation(context, request.question)  # Call the unified function
+    context += f"\nUser: {request.question}\nAI: {answer}"
+    return {"answer": answer}
 
 
 if __name__ == "__main__":
