@@ -1,12 +1,10 @@
-import repackage
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel  # Import BaseModel
+from pydantic import BaseModel
 
-repackage.up()
-from models.ollama.main import handle_conversation  # Import the unified function
+from models.ollama.main import handle_conversation
 
 app = FastAPI()
 
@@ -28,13 +26,72 @@ templates = Jinja2Templates(directory="ui/templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
+    """
+    Serve the main HTML page for the chatbot application.
+
+    This endpoint handles GET requests to the root URL ("/") and
+    returns the main HTML template for the chatbot interface. It uses
+    Jinja2 templates to render the HTML file.
+
+    Parameters:
+    ----------
+    request : Request
+        The incoming request object containing information about the
+        HTTP request.
+
+    Returns:
+    -------
+    HTMLResponse
+        The rendered HTML response containing the chatbot interface.
+
+    Example:
+    --------
+    When a user navigates to the root URL, this function will return
+    the index.html template, allowing them to interact with the
+    chatbot.
+    """
     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.post("/ask")
-async def ask(request: QuestionRequest):  # Use the Pydantic model here
+async def ask(request: QuestionRequest):
+    """
+    Handle user questions sent to the chatbot.
+
+    This endpoint processes POST requests to the "/ask" URL. It
+    expects a JSON payload containing a user's question. The function
+    invokes the handle_conversation function to generate a response
+    based on the current context and the provided question. The
+    conversation history is updated with each new question and answer.
+
+    Parameters:
+    ----------
+    request : QuestionRequest
+        A Pydantic model instance that contains the user's question as
+        a string.
+
+    Returns:
+    -------
+    dict
+        A JSON object containing the chatbot's response under the key
+        "answer".
+
+    Example:
+    --------
+    When a user sends a POST request with a question:
+
+        {
+            "question": "What is your name?"
+        }
+
+    The function will return a response like:
+
+        {
+            "answer": "I am your AI chatbot!"
+        }
+    """
     global context
-    answer = handle_conversation(context, request.question)  # Call the unified function
+    answer = handle_conversation(context, request.question)
     context += f"\nUser: {request.question}\nAI: {answer}"
     return {"answer": answer}
 
