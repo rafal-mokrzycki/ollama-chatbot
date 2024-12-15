@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import pytest
 
@@ -28,7 +29,7 @@ def test_create_directory(logger):
     """Test that the 'logs' directory is created if it doesn't already exist."""
     # Remove the logs directory for testing purposes
     if os.path.exists("logs"):
-        os.rmdir("logs")
+        shutil.rmtree("logs")  # Use rmtree to ensure it's removed
 
     logger.create_directory()
     assert os.path.exists("logs")
@@ -37,7 +38,14 @@ def test_create_directory(logger):
 def test_create_log_file(logger):
     """Test that a log file is created with a specified name."""
     logger.create_log_file()
-    assert os.path.isfile(logger.log_file_path)
+
+    # Check if log file path is set correctly
+    assert logger.log_file_path is not None, "Log file path should not be None"
+
+    # Check if the log file was created
+    assert os.path.isfile(
+        logger.log_file_path
+    ), f"Log file {logger.log_file_path} was not created."
 
 
 def test_write_logs(logger):
@@ -52,4 +60,10 @@ def test_write_logs(logger):
         content = log_file.read()
 
     expected_content = "User: What is your name?\nAI: I am an AI chatbot.\n"
-    assert expected_content in content
+    assert (
+        expected_content in content
+    ), f"Expected content not found in log file. Content: {content}"
+
+
+if __name__ == "__main__":
+    pytest.main()

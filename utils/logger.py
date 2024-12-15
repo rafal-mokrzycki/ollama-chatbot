@@ -23,7 +23,7 @@ class CustomLogger:
         """
         self.log_file_path = log_file_path
 
-    def create_directory(self):
+    def create_directory(self, directory: str | None = None):
         """
         Creates a directory named 'logs' if it does not already exist.
 
@@ -31,8 +31,10 @@ class CustomLogger:
         and creates it if it is not found. This is necessary to store
         log files in a dedicated location.
         """
-        if not os.path.exists("logs"):
-            os.makedirs("logs")
+        if directory is None:
+            directory = "logs"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
     def create_log_file(self):
         """
