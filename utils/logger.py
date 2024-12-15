@@ -23,6 +23,9 @@ class CustomLogger:
         """
         self.log_file_path = log_file_path
 
+    def __repr__(self):
+        return self.log_file_path
+
     def create_directory(self, directory: str | None = None):
         """
         Creates a directory named 'logs' if it does not already exist.
@@ -36,7 +39,7 @@ class CustomLogger:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-    def create_log_file(self):
+    def create_log_file(self, directory: str | None = None):
         """
         Creates a new log file with a timestamped name if no log file path is set.
 
@@ -45,9 +48,13 @@ class CustomLogger:
         `self.log_file_path`. If `self.log_file_path` is already set,
         this method does nothing.
         """
+        if directory is None:
+            directory = "logs"
         if self.log_file_path is None:
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            self.log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
+            self.log_file_path = os.path.join(
+                directory, f"conversation_{timestamp}.log"
+            )
 
     def write_logs(self, question: str, answer: str):
         """

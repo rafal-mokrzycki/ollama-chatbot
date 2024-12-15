@@ -11,7 +11,7 @@ from models.ollama.main import handle_conversation
 from utils.logger import CustomLogger
 
 app = FastAPI()
-custom_logger = CustomLogger()
+custom_logger = CustomLogger("filepath")
 
 
 # Define a Pydantic model for the request body
