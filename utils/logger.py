@@ -4,7 +4,8 @@ import os
 
 class CustomLogger:
     """
-    A custom logger for recording user questions and AI responses in a log file.
+    A custom logger for recording user questions
+    and AI responses in a log file.
 
     Attributes:
     ----------
@@ -41,7 +42,8 @@ class CustomLogger:
 
     def create_log_file(self, directory: str | None = None):
         """
-        Creates a new log file with a timestamped name if no log file path is set.
+        Creates a new log file with a timestamped name
+        if no log file path is set.
 
         This method generates a timestamped filename for the log file
         based on the current date and time, and assigns it to
