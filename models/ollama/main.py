@@ -66,24 +66,29 @@ def handle_conversation_decorator(func):
             # CLI mode
             context = ""
             print("Welcome to the AI ChatBot! Type 'exit' to quit.")
+
+            # Create a timestamp for the log file name at the start of the conversation
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
+
             # Ensure logs directory exists
             if not os.path.exists("logs"):
                 os.makedirs("logs")
 
-            # Create a timestamp for the log file name
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
-
-            # Write the conversation context and response to the log file
-            with open(log_file_path, "a") as log_file:
+            with open(log_file_path, "a", encoding="utf-8") as log_file:
                 while True:
                     user_input = input("You: ")
                     if user_input.lower() == "exit":
                         break
+
                     result = func(context, user_input)
                     print("Bot: ", result)
+
+                    # Write to the log file for each interaction
                     log_file.write(f"User: {user_input}\n")
-                    # log_file.write(f"AI: {response}\n")
+                    log_file.write(f"AI: {result}\n")
+
+                    # Update context with user input and bot response
                     context += f"\nUser: {user_input}\nAI: {result}"
         else:
             # Web mode
