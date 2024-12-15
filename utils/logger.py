@@ -3,7 +3,7 @@ import os
 
 
 class CustomLogger:
-    def __init__(self, log_file_path):
+    def __init__(self, log_file_path: str):
         self.log_file_path = log_file_path
 
     def create_directory(self):
@@ -15,7 +15,7 @@ class CustomLogger:
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             self.log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
 
-    def write_logs(self, question, answer):
+    def write_logs(self, question: str, answer: str):
         with open(self.log_file_path, "a", encoding="utf-8") as log_file:
             log_file.write(f"User: {question}\n")
             log_file.write(f"AI: {answer}\n")
