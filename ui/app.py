@@ -1,3 +1,6 @@
+import datetime
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -16,6 +19,7 @@ class QuestionRequest(BaseModel):
 
 # Store conversation history in memory (for simplicity)
 context = ""
+log_file_path = None  # Initialize log file path globally
 
 # Serve static files (CSS) from the static directory
 app.mount("/static", StaticFiles(directory="ui/static"), name="static")
@@ -90,9 +94,24 @@ async def ask(request: QuestionRequest):
             "answer": "I am your AI chatbot!"
         }
     """
-    global context
+    global context, log_file_path
+
+    # Create a new log file for each session if it doesn't exist
+    if log_file_path is None:
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
+        if not os.path.exists("logs"):
+            os.makedirs("logs")
+
     answer = handle_conversation(context, request.question)
+
+    # Log the conversation to the file
+    with open(log_file_path, "a", encoding="utf-8") as log_file:
+        log_file.write(f"User: {request.question}\n")
+        log_file.write(f"AI: {answer}\n")
+
     context += f"\nUser: {request.question}\nAI: {answer}"
+
     return {"answer": answer}
 
 
