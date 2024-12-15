@@ -11,7 +11,6 @@ from models.ollama.main import handle_conversation
 from utils.logger import CustomLogger
 
 app = FastAPI()
-custom_logger = CustomLogger("filepath")
 
 
 # Define a Pydantic model for the request body
@@ -97,20 +96,16 @@ async def ask(request: QuestionRequest):
         }
     """
     global context, log_file_path
+    custom_logger = CustomLogger(log_file_path)
 
     # Create a new log file for each session if it doesn't exist
-    if log_file_path is None:
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
-        if not os.path.exists("logs"):
-            os.makedirs("logs")
+    custom_logger.create_log_file()
+    custom_logger.create_directory()
 
     answer = handle_conversation(context, request.question)
 
     # Log the conversation to the file
-    with open(log_file_path, "a", encoding="utf-8") as log_file:
-        log_file.write(f"User: {request.question}\n")
-        log_file.write(f"AI: {answer}\n")
+    custom_logger.write_logs(request.question, answer)
 
     context += f"\nUser: {request.question}\nAI: {answer}"
 

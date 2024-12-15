@@ -13,7 +13,7 @@ class CustomLogger:
         The path to the log file where conversation logs will be stored.
     """
 
-    def __init__(self, log_file_path: str):
+    def __init__(self, log_file_path: str | None):
         """
         Initializes the CustomLogger with a specified log file path.
 
