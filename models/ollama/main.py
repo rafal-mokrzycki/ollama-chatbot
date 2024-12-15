@@ -67,7 +67,8 @@ def handle_conversation_decorator(func):
             context = ""
             print("Welcome to the AI ChatBot! Type 'exit' to quit.")
 
-            # Create a timestamp for the log file name at the start of the conversation
+            # Create a timestamp for the log file name
+            # at the start of the conversation
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
 
@@ -98,7 +99,7 @@ def handle_conversation_decorator(func):
 
 
 @handle_conversation_decorator
-def handle_conversation(context, question):
+def handle_conversation(context, question, log_file_path=None):
     """
     Generate a response from the chatbot based on the provided context
     and question.
@@ -131,6 +132,13 @@ def handle_conversation(context, question):
     ... question.
     """
     result = chain.invoke({"context": context, "question": question})
+
+    # If log_file_path is provided, log the conversation
+    if log_file_path:
+        with open(log_file_path, "a") as log_file:
+            log_file.write(f"User: {question}\n")
+            log_file.write(f"AI: {result}\n")
+
     return result  # Return the result instead of printing it
 
 
