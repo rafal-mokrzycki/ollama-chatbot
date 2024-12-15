@@ -1,3 +1,6 @@
+import datetime
+import os
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import OllamaLLM
 
@@ -63,13 +66,25 @@ def handle_conversation_decorator(func):
             # CLI mode
             context = ""
             print("Welcome to the AI ChatBot! Type 'exit' to quit.")
-            while True:
-                user_input = input("You: ")
-                if user_input.lower() == "exit":
-                    break
-                result = func(context, user_input)
-                print("Bot: ", result)
-                context += f"\nUser: {user_input}\nAI: {result}"
+            # Ensure logs directory exists
+            if not os.path.exists("logs"):
+                os.makedirs("logs")
+
+            # Create a timestamp for the log file name
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
+
+            # Write the conversation context and response to the log file
+            with open(log_file_path, "a") as log_file:
+                while True:
+                    user_input = input("You: ")
+                    if user_input.lower() == "exit":
+                        break
+                    result = func(context, user_input)
+                    print("Bot: ", result)
+                    log_file.write(f"User: {user_input}\n")
+                    # log_file.write(f"AI: {response}\n")
+                    context += f"\nUser: {user_input}\nAI: {result}"
         else:
             # Web mode
             return func(context, question)
