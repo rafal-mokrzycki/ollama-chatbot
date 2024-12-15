@@ -8,9 +8,9 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from models.ollama.main import handle_conversation
-
+from utils.logger import
 app = FastAPI()
-
+custom_logger = CustomLogger()
 
 # Define a Pydantic model for the request body
 class QuestionRequest(BaseModel):
