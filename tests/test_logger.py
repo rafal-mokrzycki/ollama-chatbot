@@ -7,36 +7,56 @@ from utils.logger import CustomLogger
 
 
 @pytest.fixture(scope="module")
-def logger():
+def log_dir():
+    """Fixture to create log_dir for testing."""
+    yield "logs_for_tests"
+
+
+@pytest.fixture(scope="module")
+def log_file_path(log_dir):
+    """Fixture to create log_file_path for testing."""
+    yield f"{log_dir}/conversation_test.log"
+
+
+@pytest.fixture(scope="module")
+def logger(log_file_path):
     """Fixture to create a CustomLogger instance for testing."""
-    log_file_path = "logs_for_tests/conversation_test.log"
     logger_instance = CustomLogger(log_file_path)
 
     yield logger_instance
 
 
-def test_create_directory(logger):
+def test_create_directory(logger, log_dir):
     """
     Test that the 'logs_for_tests' directory
     is created if it doesn't already exist.
     """
 
-    logger.create_directory("logs_for_tests")
-    assert os.path.exists("logs_for_tests")
-    shutil.rmtree("logs_for_tests", ignore_errors=True)
+    logger.create_directory(log_dir)
+    assert os.path.exists(log_dir)
+    shutil.rmtree(log_dir, ignore_errors=True)
 
 
-def test_create_log_file(logger):
+def test_create_log_file(logger, log_dir, log_file_path):
     """Test that a log file is created with a specified name."""
 
-    logger.create_log_file("logs_for_tests")
-    assert logger.log_file_path == "logs_for_tests/conversation_test.log"
+    # Ensure the log directory exists before creating the log file
+    logger.create_directory(log_dir)
+
+    # Pass the directory to create the log file
+    logger.create_log_file(log_dir)
+    assert logger.log_file_path == log_file_path
+    shutil.rmtree(log_dir, ignore_errors=True)
 
 
-def test_write_logs(logger):
+def test_write_logs(logger, log_dir):
     """Test that logs are written correctly to the log file."""
 
-    logger.create_log_file()  # Ensure the log file is created
+    # Ensure the log directory exists before creating the log file
+    logger.create_directory(log_dir)
+
+    # Pass the directory to create the log file
+    logger.create_log_file(log_dir)
 
     # Write a log entry
     logger.write_logs("What is your name?", "I am an AI chatbot.")
@@ -50,6 +70,7 @@ def test_write_logs(logger):
     assert (
         expected_content in content
     ), f"Expected content not found in log file. Content: {content}"
+    shutil.rmtree(log_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":
