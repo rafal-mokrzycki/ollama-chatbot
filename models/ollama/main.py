@@ -1,3 +1,6 @@
+import datetime
+import os
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import OllamaLLM
 
@@ -63,13 +66,31 @@ def handle_conversation_decorator(func):
             # CLI mode
             context = ""
             print("Welcome to the AI ChatBot! Type 'exit' to quit.")
-            while True:
-                user_input = input("You: ")
-                if user_input.lower() == "exit":
-                    break
-                result = func(context, user_input)
-                print("Bot: ", result)
-                context += f"\nUser: {user_input}\nAI: {result}"
+
+            # Create a timestamp for the log file name
+            # at the start of the conversation
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            log_file_path = os.path.join("logs", f"conversation_{timestamp}.log")
+
+            # Ensure logs directory exists
+            if not os.path.exists("logs"):
+                os.makedirs("logs")
+
+            with open(log_file_path, "a", encoding="utf-8") as log_file:
+                while True:
+                    user_input = input("You: ")
+                    if user_input.lower() == "exit":
+                        break
+
+                    result = func(context, user_input)
+                    print("Bot: ", result)
+
+                    # Write to the log file for each interaction
+                    log_file.write(f"User: {user_input}\n")
+                    log_file.write(f"AI: {result}\n")
+
+                    # Update context with user input and bot response
+                    context += f"\nUser: {user_input}\nAI: {result}"
         else:
             # Web mode
             return func(context, question)
@@ -78,7 +99,7 @@ def handle_conversation_decorator(func):
 
 
 @handle_conversation_decorator
-def handle_conversation(context, question):
+def handle_conversation(context, question, log_file_path=None):
     """
     Generate a response from the chatbot based on the provided context
     and question.
@@ -111,6 +132,13 @@ def handle_conversation(context, question):
     ... question.
     """
     result = chain.invoke({"context": context, "question": question})
+
+    # If log_file_path is provided, log the conversation
+    if log_file_path:
+        with open(log_file_path, "a") as log_file:
+            log_file.write(f"User: {question}\n")
+            log_file.write(f"AI: {result}\n")
+
     return result  # Return the result instead of printing it
 
 

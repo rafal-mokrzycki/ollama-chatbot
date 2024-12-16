@@ -27,3 +27,7 @@ Run `pip install -r requirements.txt`.
 
 1. Activate virtual environment: `.venv\Scripts\activate`.
 2. Run app: `python models/ollama/main.py`
+
+## Testing and Debugging
+
+For testing purposes, run `pytest tests/test_logger.py`.
