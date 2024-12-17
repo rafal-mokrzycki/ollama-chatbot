@@ -3,6 +3,7 @@ from pinecone.core.openapi.shared.exceptions import (
     PineconeApiException,
     NotFoundException,
 )
+from langchain_openai import OpenAIEmbeddings
 
 from cfg.config import load_config
 
@@ -27,13 +28,12 @@ class PineconeConnection:
             self.pinecone_api_key = config["pinecone"]["api_key"]
         else:
             self.pinecone_api_key = pinecone_api_key
-        # embeddings = ""
         self.pinecone = Pinecone(api_key=self.pinecone_api_key)
         self.metrics = metrics
         self.dimension = dimension
         self.cloud = cloud
         self.region = region
-        # self.vector_db = Pinecone.from_existing_index(index_name, embeddings)
+        self.embeddings_model = OpenAIEmbeddings(api_key=config["openai"]["api_key"])
 
     def create_index(self) -> None:
         """
@@ -98,3 +98,38 @@ class PineconeConnection:
 
     def __repr__(self):
         return str(self.pinecone.describe_index(self.index_name))
+
+    def load_dataset_and_upsert(
+        self, dataset: list[str], ids: list[str], namespace: str | None = None
+    ) -> None:
+        """
+        Loads a dataset for embeddings and upserts them into the Pinecone index.
+
+        Args:
+            dataset (list[str]): List of text data to be embedded.
+            ids (list[str]): List of unique identifiers for each text entry.
+            namespace (str): Optional namespace for organizing data.
+
+        Raises:
+            ValueError: If the length of dataset and ids do not match.
+        """
+        if namespace is None:
+            namespace = config["pinecone"]["namespace"]["raw"]
+        if len(dataset) != len(ids):
+            raise ValueError("The length of dataset and ids must match.")
+
+        # Generate embeddings for the dataset
+        embeddings = self.embeddings_model.embed_documents(dataset)
+
+        # Prepare vectors for upsert
+        vectors_to_upsert = [(ids[i], embeddings[i]) for i in range(len(dataset))]
+
+        # Upsert vectors into Pinecone index
+        self.pinecone.Index(self.index_name).upsert(
+            vectors=vectors_to_upsert, namespace=namespace
+        )
+
+        print(
+            f"Successfully upserted {len(vectors_to_upsert)} vectors \
+                into the index `{self.index_name}`."
+        )
