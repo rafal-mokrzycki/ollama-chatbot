@@ -21,15 +21,19 @@ class PineconeConnection:
     ):
         if index_name is None:
             self.index_name = config["pinecone"]["index_name"]
+        else:
+            self.index_name = index_name
         if pinecone_api_key is None:
             self.pinecone_api_key = config["pinecone"]["api_key"]
-        embeddings = ""
+        else:
+            self.pinecone_api_key = pinecone_api_key
+        # embeddings = ""
         self.pinecone = Pinecone(api_key=self.pinecone_api_key)
         self.metrics = metrics
         self.dimension = dimension
         self.cloud = cloud
         self.region = region
-        self.vector_db = Pinecone.from_existing_index(index_name, embeddings)
+        # self.vector_db = Pinecone.from_existing_index(index_name, embeddings)
 
     def create_index(self) -> None:
         """
@@ -63,7 +67,9 @@ class PineconeConnection:
         Args:
             namespace (str): Namespace to delete data in.
         """
-        self.pinecone.index.delete(delete_all=True, namespace=namespace)
+        self.pinecone.Index(self.index_name).delete(
+            delete_all=True, namespace=namespace
+        )
         print(f"All data in namespace `{namespace}` successfully deleted.")
 
     def show_statistics(self):
