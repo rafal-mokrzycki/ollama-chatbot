@@ -1,9 +1,9 @@
+from langchain_openai import OpenAIEmbeddings
 from pinecone import Pinecone, ServerlessSpec
 from pinecone.core.openapi.shared.exceptions import (
-    PineconeApiException,
     NotFoundException,
+    PineconeApiException,
 )
-from langchain_openai import OpenAIEmbeddings
 
 from cfg.config import load_config
 
